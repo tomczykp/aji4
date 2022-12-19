@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: aji4
+      POSTGRES_USER: aji
+      POSTGRES_PASSWORD: passwd
+    ports:
+      - 5432:5432
+    volumes:
+      - ./tmp:/var/lib/postgresql/data
