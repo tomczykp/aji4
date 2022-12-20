@@ -11,9 +11,11 @@ export default class SubOrderModel {
     @IsNotEmpty()
     amount!: number;
 
-    @ManyToOne(() => ProductModel, (product : ProductModel) => product.orders)
+    @ManyToOne(() => ProductModel, (product :  ProductModel) => product.orders)
     product!: ProductModel;
 
-    @ManyToOne(() => OrderModel, (order : OrderModel) => order.subOrders)
+    @ManyToOne(() => OrderModel, (order :  OrderModel) => order.subOrders)
     order!: OrderModel;
 }
+
+exports.module = SubOrderModel;

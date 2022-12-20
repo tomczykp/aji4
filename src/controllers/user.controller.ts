@@ -11,11 +11,11 @@ export default class UserController {
         //Get users from database
         const userRepository : Repository<User> = dbConn.getRepository(User);
         const users: User[] = await userRepository.find({
-            select: ["id", "username", "role"] //We dont want to send the passwords on response
+            select: {"id": true, "username": true, "role": true} //We don't want to send the passwords on response
         });
 
         //Send the users object
-        res.send(users);
+        res.json(users);
     };
 
     static getOneById = async (req: Request, res: Response) => {
@@ -26,27 +26,23 @@ export default class UserController {
         const userRepository : Repository<User> = dbConn.getRepository(User);
         try {
             const user: User = await userRepository.findOneOrFail({
-                select: ["id", "username", "role"], //We dont want to send the password on response
+                select: {"id": true, "username": true, "role": true},
                 where: {id: uid}
             });
-            res.send(user);
+            res.json(user);
         } catch (error) {
-            res.status(404).send("UserEntity not found");
+            res.status(404).json("User not found");
         }
     };
 
     static newUser = async (req: Request, res: Response) => {
         //Get parameters from the body
-        let {username, password, role} = req.body;
-        let user: User = new User();
-        user.username = username;
-        user.password = password;
-        user.role = role;
+        let user: User = req.body;
 
-        //Validade if the parameters are ok
+        //Validate if the parameters are ok
         const errors: ValidationError[] = await validate(user);
         if (errors.length > 0) {
-            res.status(400).send(errors);
+            res.status(400).json(errors);
             return;
         }
 
@@ -56,74 +52,73 @@ export default class UserController {
         //Try to save. If fails, the username is already in use
         const userRepository : Repository<User> = dbConn.getRepository(User);
         try {
-            await userRepository.save(user);
+            await userRepository.insert(user);
         } catch (e) {
-            res.status(409).send("username already in use");
+            res.status(409).json("username already in use");
             return;
         }
 
         //If all ok, send 201 response
-        res.status(201).send("UserEntity created");
+        res.status(201).json("User created");
     };
 
     static editUser = async (req: Request, res: Response) => {
         //Get the ID from the url
-        const id: string = req.params.id;
+        const uid: string = req.params.id;
 
         //Get values from the body
-        const {username, role} = req.body;
+        const userDTO : User = req.body;
 
         //Try to find user on database
         const userRepository : Repository<User> = dbConn.getRepository(User);
         let user: User;
         try {
             user = await userRepository.findOneOrFail({
-                where: {id: id}
+                where: {id: uid}
             });
         } catch (error) {
             //If not found, send a 404 response
-            res.status(404).send("UserEntity not found");
+            res.status(404).json(`User with id: ${uid} not found`);
             return;
         }
 
         //Validate the new values on entities
-        user.username = username;
-        user.role = role;
-        const errors: ValidationError[] = await validate(user);
+        const errors: ValidationError[] = await validate(userDTO);
         if (errors.length > 0) {
-            res.status(400).send(errors);
+            res.status(400).json(errors);
             return;
         }
 
         //Try to safe, if fails, that means username already in use
+        user = userDTO;
+        user.id = uid; // not sure if necessary
         try {
-            await userRepository.save(user);
+            await userRepository.save(userDTO);
         } catch (e) {
-            res.status(409).send("username already in use");
+            res.status(409).json("username already in use");
             return;
         }
         //After all send a 204 (no content, but accepted) response
-        res.status(204).send();
+        res.status(204).json(user);
     };
 
     static deleteUser = async (req: Request, res: Response) => {
         //Get the ID from the url
-        const id: string = req.params.id;
+        const uid: string = req.params.id;
 
         const userRepository : Repository<User> = dbConn.getRepository(User);
-        let user: User;
         try {
-            user = await userRepository.findOneOrFail({
-                where: {id: id}
+            await userRepository.findOneOrFail({
+                where: {id: uid}
             });
         } catch (error) {
-            res.status(404).send("UserEntity not found");
+            res.status(404).json("User not found");
             return;
         }
-        await userRepository.delete(id);
+        await userRepository.delete(uid);
 
         //After all send a 204 (no content, but accepted) response
-        res.status(204).send();
+        res.status(204).json();
     };
 };
 
