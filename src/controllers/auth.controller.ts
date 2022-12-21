@@ -1,12 +1,14 @@
 import {Request, Response} from "express";
 import * as jwt from "jsonwebtoken";
 import {validate, ValidationError} from "class-validator";
-import User from "../entities/user.entity";
+import {UserModel} from "../entity/user.entity";
 import {Config} from "../config/environment";
 import {Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
+import UserManager from "../managers/user.manager";
 
 export default class AuthController {
+
     static login = async (req: Request, res: Response) => {
         //Check if username and password are set
         const {username, password} = req.body;
@@ -16,8 +18,8 @@ export default class AuthController {
         }
 
         //Get user from database
-        const userRepository : Repository<User> = dbConn.getRepository(User);
-        let user: User;
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        let user: UserModel;
         try {
             user = await userRepository.findOneOrFail({where: {username: username}});
         } catch (error) {
@@ -26,7 +28,7 @@ export default class AuthController {
         }
 
         //Check if encrypted password match
-        if (!user.checkIfUnencryptedPasswordIsValid(password)) {
+        if (!UserManager.checkIfUnencryptedPasswordIsValid(user, password)) {
             res.status(401).send();
             return;
         }
@@ -54,8 +56,8 @@ export default class AuthController {
         }
 
         //Get user from the database
-        const userRepository : Repository<User> = dbConn.getRepository(User);
-        let user: User;
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        let user: UserModel;
         try {
             user = await userRepository.findOneOrFail({
                 where: {id: id}
@@ -66,12 +68,12 @@ export default class AuthController {
         }
 
         //Check if old password matchs
-        if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) {
+        if (!UserManager.checkIfUnencryptedPasswordIsValid(user, oldPassword)) {
             res.status(401).send();
             return;
         }
 
-        //Validate the entities (password lenght)
+        //Validate the entity (password lenght)
         user.password = newPassword;
         const errors : ValidationError[] = await validate(user);
         if (errors.length > 0) {
@@ -79,7 +81,7 @@ export default class AuthController {
             return;
         }
         //Hash the new password and save
-        user.hashPassword();
+        UserManager.hashPassword(user);
         await userRepository.save(user);
 
         res.status(204).send();

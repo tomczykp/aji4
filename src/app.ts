@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import express from "express";
+import * as express from "express";
 import * as bodyParser from "body-parser";
 import helmet from "helmet";
-import cors from 'cors';
+import * as cors from 'cors';
 import userRouter from "./routes/user.route";
 import authRouter from "./routes/auth.route";
 import {Config} from './config/environment';
@@ -31,4 +31,3 @@ dbConn
     .catch((err) => {
         console.error("Error during Data Source initialization:", err);
     })
-

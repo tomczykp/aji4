@@ -1,20 +1,18 @@
 import {Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique} from "typeorm";
 import {Length} from "class-validator";
-import ProductModel from "./product.entity";
+import {ProductModel} from "./product.entity";
 
 @Entity()
 @Unique(["name"])
-export default class CategoryModel {
+export class CategoryModel {
     @PrimaryGeneratedColumn("uuid")
-    id!: string;
+    id: string;
 
     @Column()
     @Length(4, 20)
-    name!: string;
+    name: string;
 
     @OneToMany(() => ProductModel, (product : ProductModel) => product.category)
-    products!: ProductModel[];
+    products: ProductModel[];
 }
 
-
-exports.module = CategoryModel;

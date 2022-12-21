@@ -1,31 +1,21 @@
 import { Router } from "express";
-import UserController from "../controllers/user.controller";
+import UserManager from "../managers/user.manager";
 
 const router = Router();
 
 //Get all users
-router.get("/", UserController.listAll);
+router.get("/", UserManager.listAll);
 
 // Get one user
-router.get(
-    "/:id",
-    UserController.getOneById
-);
+router.get("/:id", UserManager.getOneById);
 
 //Create a new user
-// router.post("/", [checkJwt, checkRole(["ADMIN"])], UserController.newUser);
-router.put("/", UserController.newUser);
+router.put("/", UserManager.newUser);
 
 //Edit one user
-router.post(
-    "/:id",
-    UserController.editUser
-);
+router.post("/:id", UserManager.editUser);
 
 //Delete one user
-router.delete(
-    "/:id",
-    UserController.deleteUser
-);
+router.delete("/:id", UserManager.deleteUser);
 
 export default router;

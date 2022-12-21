@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {Repository} from "typeorm";
-import ProductModel from "../entities/product.entity";
+import {ProductModel} from "../entity/product.entity";
 import {dbConn} from "../app-data-source";
 
 export default class ProductController {

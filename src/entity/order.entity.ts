@@ -1,29 +1,38 @@
-import SubOrderModel from "./single.order.entity";
-import {Column, CreateDateColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {SubOrderModel} from "./single.order.entity";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
+} from "typeorm";
 import {IsNotEmpty} from "class-validator";
-import UserModel from "./user.entity";
+import {UserModel} from "./user.entity";
 
-export default class OrderModel {
+@Entity()
+export class OrderModel {
     @PrimaryGeneratedColumn("uuid")
-    id!: string;
+    id: string;
 
     @Column()
     @IsNotEmpty()
-    status!: string;
+    status: string;
 
     @Column()
     @CreateDateColumn()
-    createdAt!: Date;
+    createdAt: Date;
 
     @Column()
     @UpdateDateColumn()
-    updatedAt!: Date;
+    updatedAt: Date;
 
     @ManyToOne(() => UserModel, (user : UserModel) => user.orders)
-    user!: UserModel;
+    user: UserModel;
 
     @OneToMany(() => SubOrderModel, (suborder : SubOrderModel) => suborder.order)
-    subOrders!: SubOrderModel[];
+    subOrders: SubOrderModel[];
 
     total() : number {
         return this.subOrders.reduce((total : number, subOrder : SubOrderModel) => total + subOrder.product.price * subOrder.amount, 0);
@@ -34,5 +43,3 @@ export default class OrderModel {
     }
 
 }
-
-exports.module = OrderModel;

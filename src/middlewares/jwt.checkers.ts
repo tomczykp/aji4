@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import {Config} from "../config/environment";
-import User from '../entities/user.entity';
+import {UserModel} from '../entity/user.entity';
 import {dbConn} from "../app-data-source";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
@@ -37,8 +37,8 @@ export const checkRole = (roles: Array<string>) => {
         const id = res.locals.jwtPayload.userId;
 
         //Get user role from the database
-        const userRepository = dbConn.getRepository(User);
-        let user: User;
+        const userRepository = dbConn.getRepository(UserModel);
+        let user: UserModel;
         try {
             user = await userRepository.findOneOrFail(id);
         } catch (id) {

@@ -2,20 +2,26 @@ import {Request, Response} from "express";
 import {Repository} from "typeorm";
 import {validate, ValidationError} from "class-validator";
 
-import User from "../entities/user.entity";
+import {UserModel} from "../entity/user.entity";
 import {dbConn} from "../app-data-source";
+import UserManager from "../managers/user.manager";
 
 export default class UserController {
 
     static listAll = async (req: Request, res: Response) => {
         //Get users from database
-        const userRepository : Repository<User> = dbConn.getRepository(User);
-        const users: User[] = await userRepository.find({
-            select: {"id": true, "username": true, "role": true} //We don't want to send the passwords on response
-        });
+        try {
+            const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
 
-        //Send the users object
-        res.json(users);
+            const users: UserModel[] = await userRepository.find({
+                select: {"id": true, "username": true, "role": true} //We don't want to send the passwords on response
+            });
+
+            //Send the users object
+            res.json(users);
+        } catch (error) {
+            res.json(error);
+        }
     };
 
     static getOneById = async (req: Request, res: Response) => {
@@ -23,21 +29,21 @@ export default class UserController {
         const uid: string = req.params.id;
 
         //Get the user from database
-        const userRepository : Repository<User> = dbConn.getRepository(User);
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
-            const user: User = await userRepository.findOneOrFail({
+            const user: UserModel = await userRepository.findOneOrFail({
                 select: {"id": true, "username": true, "role": true},
                 where: {id: uid}
             });
             res.json(user);
         } catch (error) {
-            res.status(404).json("User not found");
+            res.status(404).json("user not found");
         }
     };
 
     static newUser = async (req: Request, res: Response) => {
         //Get parameters from the body
-        let user: User = req.body;
+        let user: UserModel = req.body;
 
         //Validate if the parameters are ok
         const errors: ValidationError[] = await validate(user);
@@ -47,10 +53,10 @@ export default class UserController {
         }
 
         //Hash the password, to securely store on DB
-        user.hashPassword();
+        UserManager.hashPassword(user);
 
         //Try to save. If fails, the username is already in use
-        const userRepository : Repository<User> = dbConn.getRepository(User);
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
             await userRepository.insert(user);
         } catch (e) {
@@ -59,7 +65,7 @@ export default class UserController {
         }
 
         //If all ok, send 201 response
-        res.status(201).json("User created");
+        res.status(201).json("UserModel created");
     };
 
     static editUser = async (req: Request, res: Response) => {
@@ -67,22 +73,22 @@ export default class UserController {
         const uid: string = req.params.id;
 
         //Get values from the body
-        const userDTO : User = req.body;
+        const userDTO : UserModel = req.body;
 
         //Try to find user on database
-        const userRepository : Repository<User> = dbConn.getRepository(User);
-        let user: User;
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        let user: UserModel;
         try {
             user = await userRepository.findOneOrFail({
                 where: {id: uid}
             });
         } catch (error) {
             //If not found, send a 404 response
-            res.status(404).json(`User with id: ${uid} not found`);
+            res.status(404).json(`UserModel with id: ${uid} not found`);
             return;
         }
 
-        //Validate the new values on entities
+        //Validate the new values on entity
         const errors: ValidationError[] = await validate(userDTO);
         if (errors.length > 0) {
             res.status(400).json(errors);
@@ -106,13 +112,13 @@ export default class UserController {
         //Get the ID from the url
         const uid: string = req.params.id;
 
-        const userRepository : Repository<User> = dbConn.getRepository(User);
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
             await userRepository.findOneOrFail({
                 where: {id: uid}
             });
         } catch (error) {
-            res.status(404).json("User not found");
+            res.status(404).json("UserModel not found");
             return;
         }
         await userRepository.delete(uid);
