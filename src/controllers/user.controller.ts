@@ -12,15 +12,12 @@ export default class UserController {
         //Get users from database
         try {
             const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
-
             const users: UserModel[] = await userRepository.find({
                 select: {"id": true, "username": true, "role": true} //We don't want to send the passwords on response
             });
-
-            //Send the users object
             res.json(users);
         } catch (error) {
-            res.json(error);
+            res.status(500).json(error);
         }
     };
 
@@ -37,7 +34,7 @@ export default class UserController {
             });
             res.json(user);
         } catch (error) {
-            res.status(404).json("user not found");
+            res.status(404).json(`user with id: ${uid} not found`);
         }
     };
 
@@ -65,26 +62,20 @@ export default class UserController {
         }
 
         //If all ok, send 201 response
-        res.status(201).json("UserModel created");
+        res.status(201).json("a new user created");
     };
 
     static editUser = async (req: Request, res: Response) => {
         //Get the ID from the url
         const uid: string = req.params.id;
-
-        //Get values from the body
         const userDTO : UserModel = req.body;
-
-        //Try to find user on database
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         let user: UserModel;
         try {
-            user = await userRepository.findOneOrFail({
-                where: {id: uid}
-            });
+            user = await userRepository.findOneOrFail({where: {id: uid}});
         } catch (error) {
             //If not found, send a 404 response
-            res.status(404).json(`UserModel with id: ${uid} not found`);
+            res.status(404).json(`user with id: ${uid} not found`);
             return;
         }
 
@@ -99,7 +90,7 @@ export default class UserController {
         user = userDTO;
         user.id = uid; // not sure if necessary
         try {
-            await userRepository.save(userDTO);
+            await userRepository.save(user);
         } catch (e) {
             res.status(409).json("username already in use");
             return;
@@ -109,16 +100,14 @@ export default class UserController {
     };
 
     static deleteUser = async (req: Request, res: Response) => {
-        //Get the ID from the url
         const uid: string = req.params.id;
-
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
             await userRepository.findOneOrFail({
                 where: {id: uid}
             });
         } catch (error) {
-            res.status(404).json("UserModel not found");
+            res.status(404).json(`user with id: ${uid} not found`);
             return;
         }
         await userRepository.delete(uid);

@@ -2,7 +2,7 @@ import {Router} from "express";
 import AuthController from "../controllers/auth.controller";
 import {checkJwt} from "../middlewares/jwt.checkers";
 
-const router = Router();
+const router : Router = Router();
 //Login route
 router.post("/login", AuthController.login);
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import UserManager from "../managers/user.manager";
 
-const router = Router();
+const router : Router = Router();
 
 //Get all users
 router.get("/", UserManager.listAll);

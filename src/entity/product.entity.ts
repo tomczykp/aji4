@@ -1,6 +1,6 @@
 import {CategoryModel} from "./category.entity";
 import {SubOrderModel} from "./single.order.entity";
-import {Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique} from "typeorm";
+import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique} from "typeorm";
 import {IsNotEmpty, Length} from "class-validator";
 
 @Entity()
