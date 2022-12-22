@@ -62,7 +62,7 @@ export default class UserController {
         }
 
         //If all ok, send 201 response
-        res.status(201).json("a new user created");
+        res.status(200).json(user);
     };
 
     static editUser = async (req: Request, res: Response) => {
@@ -86,7 +86,6 @@ export default class UserController {
             return;
         }
 
-        //Try to safe, if fails, that means username already in use
         user = userDTO;
         user.id = uid; // not sure if necessary
         try {
@@ -96,7 +95,7 @@ export default class UserController {
             return;
         }
         //After all send a 204 (no content, but accepted) response
-        res.status(204).json(user);
+        res.status(200).json(user);
     };
 
     static deleteUser = async (req: Request, res: Response) => {

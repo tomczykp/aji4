@@ -31,16 +31,20 @@ export default class ProductController {
 
 
     static newProduct = async (req: Request, res: Response) => {
-        let product : ProductModel = req.body;
+        let product: ProductModel = req.body;
         const errors = await validate(product);
         if (errors.length > 0) {
             res.status(400).json(errors);
             return;
         }
 
-        const repo : Repository<ProductModel> = dbConn.getRepository(ProductModel);
-        await repo.insert(product);
-        res.status(201).json("a new product created");
+        try {
+            const repo: Repository<ProductModel> = dbConn.getRepository(ProductModel);
+            await repo.insert(product);
+            res.status(200).json(product);
+        } catch (errors) {
+            res.status(500).json(errors);
+        }
     }
 
     static editProduct = async (req: Request, res: Response) => {
@@ -51,7 +55,6 @@ export default class ProductController {
         try {
             product = await repo.findOneOrFail({where: {id: pid}});
         } catch (error) {
-            //If not found, send a 404 response
             res.status(404).json(`product with id: ${pid} not found`);
             return;
         }
@@ -63,17 +66,10 @@ export default class ProductController {
             return;
         }
 
-        //Try to safe, if fails, that means username already in use
         product = productDTO;
         product.id = pid; // not sure if necessary
-        try {
-            await repo.save(product);
-        } catch (e) {
-            res.status(409).json("username already in use");
-            return;
-        }
-        //After all send a 204 (no content, but accepted) response
-        res.status(204).json(product);
+        await repo.save(product);
+        res.status(200).json(product);
     }
 
     static deleteProduct = async (req: Request, res: Response) => {

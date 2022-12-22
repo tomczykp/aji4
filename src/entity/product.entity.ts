@@ -13,11 +13,11 @@ export class ProductModel {
     @Length(4, 20)
     name: string;
 
-    @Column()
+    @Column({type: "float"})
     @IsNotEmpty()
     price: number;
 
-    @Column()
+    @Column({type: "float"})
     weight: number;
 
     @ManyToOne(() => CategoryModel, (category : CategoryModel)  => category.products)
