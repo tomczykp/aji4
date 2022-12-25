@@ -33,7 +33,6 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
 export const checkRole = (roles: Array<string>) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        //Get the user ID from previous midleware
         const id = res.locals.jwtPayload.userId;
 
         //Get user role from the database

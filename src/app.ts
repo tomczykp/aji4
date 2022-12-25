@@ -5,7 +5,8 @@ import helmet from "helmet";
 import * as cors from 'cors';
 import userRouter from "./routes/user.route";
 import authRouter from "./routes/auth.route";
-import productRoute from "./routes/product.route";
+import productRouter from "./routes/product.route";
+import errorRouter from "./middlewares/error.handlers";
 import {Config} from './config/environment';
 import {dbConn} from "./app-data-source";
 
@@ -24,7 +25,8 @@ dbConn
         //Set all routes from routes folder
         app.use("/user", userRouter);
         app.use("/auth", authRouter);
-        app.use("/product", productRoute);
+        app.use("/product", productRouter);
+        app.use(errorRouter);
 
         app.listen(Config.port, () => {
             console.log(`Server started on port ${Config.port}!`);

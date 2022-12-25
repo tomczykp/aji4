@@ -1,7 +1,9 @@
 import * as bcrypt from "bcryptjs";
 import {UserModel} from "../entity/user.entity";
-import UserController from "../controllers/user.controller";
-import {Request, Response} from "express";
+import {EntityNotFoundError, Not, Repository} from "typeorm";
+import {dbConn} from "../app-data-source";
+import {validate, ValidationError} from "class-validator";
+import UserNameError from "../errors/username.taken";
 
 export default class UserManager {
 
@@ -13,9 +15,63 @@ export default class UserManager {
         return bcrypt.compareSync(unencryptedPassword, user.password);
     }
 
-    static listAll = async (req: Request, res : Response) => UserController.listAll(req, res);
-    static getOneById = async (req: Request, res : Response) => UserController.getOneById(req, res);
-    static newUser = async (req: Request, res : Response) => UserController.newUser(req, res);
-    static editUser = async (req: Request, res : Response) => UserController.editUser(req, res);
-    static deleteUser = async (req: Request, res : Response) => UserController.deleteUser(req, res);
+    static listAll = async () : Promise<UserModel[]> => {
+        const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
+        return await userRepository.find({
+            select: {"id": true, "username": true, "role": true}
+        });
+
+    };
+
+    static getOneById = async (uid : string) : Promise<UserModel> => {
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        try {
+           return await userRepository.findOneOrFail({
+                select: {"id": true, "username": true, "role": true},
+                where: {id: uid}
+            });
+        } catch (error) {
+            throw new EntityNotFoundError(UserModel, "id");
+        }
+    }
+
+    static newUser = async (userDTO : UserModel) : Promise<UserModel> => {
+        const errors: ValidationError[] = await validate(userDTO);
+        if (errors.length > 0)
+            throw new ValidationError();
+
+        UserManager.hashPassword(userDTO);
+
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        try {
+            await userRepository.insert(userDTO);
+        } catch (e) {
+            throw new UserNameError();
+        }
+        return userDTO;
+    };
+
+    static editUser = async (uid : string, userDTO : UserModel) : Promise<UserModel> => {
+        const errors: ValidationError[] = await validate(userDTO);
+        if (errors.length > 0)
+            throw new ValidationError();
+
+        await UserManager.getOneById(uid);
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+
+        const usernames = await userRepository.find({
+            where: {username: userDTO.username, id: Not(uid)}
+        });
+        if (usernames.length > 0)
+            throw new UserNameError();
+
+        userDTO.id = uid;
+        await userRepository.save(userDTO);
+        return userDTO;
+    };
+
+    static deleteUser = async (uid : string) => {
+        const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+        await userRepository.remove(await UserManager.getOneById(uid));
+    };
 }
