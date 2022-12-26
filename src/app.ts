@@ -6,7 +6,7 @@ import * as cors from 'cors';
 import userRouter from "./routes/user.route";
 import authRouter from "./routes/auth.route";
 import productRouter from "./routes/product.route";
-import errorRouter from "./middlewares/error.handlers";
+import errorHandler from "./middlewares/error.handlers";
 import {Config} from './config/environment';
 import {dbConn} from "./app-data-source";
 
@@ -26,7 +26,7 @@ dbConn
         app.use("/user", userRouter);
         app.use("/auth", authRouter);
         app.use("/product", productRouter);
-        app.use(errorRouter);
+        errorHandler(app);
 
         app.listen(Config.port, () => {
             console.log(`Server started on port ${Config.port}!`);

@@ -1,35 +1,46 @@
-import {Response, Request, NextFunction, Router} from "express";
+import {Response, Request, NextFunction, Application} from "express";
+import {QueryFailedError} from "typeorm";
 import {ValidationError} from "class-validator";
-import {EntityNotFoundError, QueryFailedError} from "typeorm";
 import UserNameError from "../errors/username.taken";
 
-const router = Router();
+const errorHandler = (app : Application) => {
 
-router.use((error : Error, req: Request, res: Response, next : NextFunction) => {
-    console.log(error.message);
-    if (!(error instanceof ValidationError))
-        next();
-    res.status(400).json(error);
-});
+    // error logger
+    app.use((error : Error, req: Request, res: Response, next: NextFunction) => {
+        console.log(`Error [${error.name}] logging: ${error.message}`);
+        return next(error);
+    });
 
-router.use((error : Error, req: Request, res: Response, next : NextFunction) => {
-    if (!(error instanceof EntityNotFoundError))
-        next();
-    res.status(404).json();
-});
 
-router.use((error : Error, req: Request, res: Response, next : NextFunction) => {
-    if (!(error instanceof UserNameError))
-        next();
+    app.use((error : Error, req: Request, res: Response, next: NextFunction) => {
+        if (error.name != "ValidationError" && !(error instanceof ValidationError))
+            return next(error);
 
-    res.status(409).json();
-});
+        res.status(400).json(error);
+    });
 
-router.use((error : Error, req: Request, res: Response, next : NextFunction) => {
-    if (!(error instanceof QueryFailedError))
-        next();
+    app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+        if (error.name != "EntityNotFoundError")
+            return next(error);
+        res.status(404).json();
+    });
 
-    res.status(500).json();
-});
+    app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+        if (error.name != "UserNameError" && !(error instanceof UserNameError))
+            return next(error);
 
-export default router;
+        res.status(409).json();
+    });
+
+    app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+        if (error.name != "QueryFailedError" && !(error instanceof QueryFailedError))
+            return next(error);
+
+        res.status(503).json();
+    });
+
+    app.use((error: Error, req: Request, res: Response) => {
+        res.status(500).json();
+    });
+}
+export default errorHandler;

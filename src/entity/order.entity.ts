@@ -8,15 +8,17 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import {IsNotEmpty} from "class-validator";
+import {IsNotEmpty, IsString, IsUUID} from "class-validator";
 import {UserModel} from "./user.entity";
 
 @Entity()
 export class OrderModel {
+    @IsUUID()
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column()
+    @IsString()
     @IsNotEmpty()
     status: string;
 

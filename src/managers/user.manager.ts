@@ -1,6 +1,6 @@
 import * as bcrypt from "bcryptjs";
 import {UserModel} from "../entity/user.entity";
-import {EntityNotFoundError, Not, Repository} from "typeorm";
+import {EntityNotFoundError, Not, QueryFailedError, Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
 import UserNameError from "../errors/username.taken";
@@ -43,10 +43,17 @@ export default class UserManager {
         UserManager.hashPassword(userDTO);
 
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
+
+        const usernames = await userRepository.find({
+            where: {username: userDTO.username}
+        });
+        if (usernames.length > 0)
+            throw new UserNameError();
+
         try {
             await userRepository.insert(userDTO);
         } catch (e) {
-            throw new UserNameError();
+            throw new QueryFailedError("INSERT", [userDTO], e);
         }
         return userDTO;
     };
@@ -66,7 +73,11 @@ export default class UserManager {
             throw new UserNameError();
 
         userDTO.id = uid;
-        await userRepository.save(userDTO);
+        try {
+            userDTO = await userRepository.save(userDTO);
+        } catch (e) {
+            throw new QueryFailedError("UPDATE", [userDTO], e);
+        }
         return userDTO;
     };
 
