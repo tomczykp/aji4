@@ -6,6 +6,8 @@ import * as cors from 'cors';
 import userRouter from "./routes/user.route";
 import authRouter from "./routes/auth.route";
 import productRouter from "./routes/product.route";
+import orderRouter from "./routes/order.route";
+import categoryRouter from "./routes/category.route";
 import errorHandler from "./middlewares/error.handlers";
 import {Config} from './config/environment';
 import {dbConn} from "./app-data-source";
@@ -26,6 +28,8 @@ dbConn
         app.use("/user", userRouter);
         app.use("/auth", authRouter);
         app.use("/product", productRouter);
+        app.use("/order", orderRouter);
+        app.use("/category", categoryRouter);
         errorHandler(app);
 
         app.listen(Config.port, () => {

@@ -4,12 +4,12 @@ import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
 
 export default class ProductManager {
-    static listAll = async () : Promise<ProductModel[]> => {
+    static getAll = async () : Promise<ProductModel[]> => {
         const repo: Repository<ProductModel> = dbConn.getRepository(ProductModel);
         return await repo.find();
     };
 
-    static getOneById = async (pid : string) : Promise<ProductModel> => {
+    static getOne = async (pid : string) : Promise<ProductModel> => {
         const repo : Repository<ProductModel> = dbConn.getRepository(ProductModel);
         try {
             return await repo.findOneOrFail({where: {id: pid}});
@@ -39,7 +39,7 @@ export default class ProductManager {
         if (errors.length > 0)
             throw new ValidationError();
 
-        await ProductManager.getOneById(pid);
+        await ProductManager.getOne(pid);
         const repo: Repository<ProductModel> = dbConn.getRepository(ProductModel);
 
         productDTO.id = pid;
@@ -53,7 +53,7 @@ export default class ProductManager {
 
     static deleteProduct = async (pid: string) => {
         const repo : Repository<ProductModel> = dbConn.getRepository(ProductModel);
-        await repo.remove(await ProductManager.getOneById(pid));
+        await repo.remove(await ProductManager.getOne(pid));
     }
 
 

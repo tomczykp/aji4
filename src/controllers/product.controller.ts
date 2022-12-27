@@ -4,15 +4,15 @@ import ProductManager from "../managers/product.manager";
 
 export default class ProductController {
 
-    static listAll = async (req: Request, res: Response) => {
-        const products : ProductModel[] = await ProductManager.listAll();
+    static getAll = async (req: Request, res: Response) : Promise<void> => {
+        const products : ProductModel[] = await ProductManager.getAll();
         res.status(200).json(products)
     }
 
-    static getOneById = async (req: Request, res: Response, next : NextFunction) => {
+    static getOne = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
         const pid : string = req.params.id;
         try {
-            const product: ProductModel = await ProductManager.getOneById(pid);
+            const product: ProductModel = await ProductManager.getOne(pid);
             res.status(200).json(product);
         } catch (e) {
             return next(e);
@@ -20,7 +20,7 @@ export default class ProductController {
     }
 
 
-    static newProduct = async (req: Request, res: Response, next : NextFunction) => {
+    static newProduct = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
         try {
             let product = await ProductManager.newProduct(req.body);
             res.status(200).json(product);
@@ -30,7 +30,7 @@ export default class ProductController {
     }
 
 
-    static editProduct = async (req: Request, res: Response, next : NextFunction) => {
+    static editProduct = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
         try {
             const product : ProductModel = await ProductManager.editProduct(req.params.id, req.body);
             res.status(200).json(product);
@@ -39,7 +39,7 @@ export default class ProductController {
         }
     }
 
-    static deleteProduct = async (req: Request, res: Response, next : NextFunction) => {
+    static deleteProduct = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
         try {
             await ProductManager.deleteProduct(req.params.id);
             res.status(204).json();

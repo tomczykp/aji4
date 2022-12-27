@@ -4,10 +4,10 @@ import UserController from "../controllers/user.controller";
 const router : Router = Router();
 
 //Get all users
-router.get("/", UserController.listAll);
+router.get("/", UserController.getAll);
 
 // Get one user
-router.get("/:id", UserController.getOneById);
+router.get("/:id", UserController.getOne);
 
 //Create a new user
 router.put("/", UserController.newUser);

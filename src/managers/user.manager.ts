@@ -15,7 +15,7 @@ export default class UserManager {
         return bcrypt.compareSync(unencryptedPassword, user.password);
     }
 
-    static listAll = async () : Promise<UserModel[]> => {
+    static getAll = async () : Promise<UserModel[]> => {
         const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
         return await userRepository.find({
             select: {"id": true, "username": true, "role": true}
@@ -23,7 +23,7 @@ export default class UserManager {
 
     };
 
-    static getOneById = async (uid : string) : Promise<UserModel> => {
+    static getOne = async (uid : string) : Promise<UserModel> => {
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
            return await userRepository.findOneOrFail({
@@ -63,7 +63,7 @@ export default class UserManager {
         if (errors.length > 0)
             throw new ValidationError();
 
-        await UserManager.getOneById(uid);
+        await UserManager.getOne(uid);
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
 
         const usernames = await userRepository.find({
@@ -83,6 +83,6 @@ export default class UserManager {
 
     static deleteUser = async (uid : string) => {
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
-        await userRepository.remove(await UserManager.getOneById(uid));
+        await userRepository.remove(await UserManager.getOne(uid));
     };
 }

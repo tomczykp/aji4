@@ -24,6 +24,7 @@ export class ProductModel {
     @IsNumber()
     weight: number;
 
+    @IsNotEmpty()
     @ManyToOne(() => CategoryModel, (category : CategoryModel)  => category.products)
     category: CategoryModel;
 
