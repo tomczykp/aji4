@@ -3,27 +3,34 @@ import {EntityNotFoundError, QueryFailedError, Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
 import {SubOrderModel} from "../entity/single.order.entity";
+import {plainToClass} from "class-transformer";
+import InvalidEntity from "../errors/invalid.entity";
 
 export default class OrderManager {
 
     static listAll = async () : Promise<OrderModel[]> => {
         const repo: Repository<OrderModel> = dbConn.getRepository(OrderModel);
-        return await repo.find();
-    }
+        return await repo.find({
+            relations: {user: true, subOrders: true}
+        });
+    };
 
     static getOneById = async (pid : string) : Promise<OrderModel> => {
         const repo : Repository<OrderModel> = dbConn.getRepository(OrderModel);
         try {
-            return await repo.findOneOrFail({where: {id: pid}});
+            return await repo.findOneOrFail({
+                where: {id: pid},
+                relations: {user: true, subOrders: true}
+            });
         } catch (e) {
             throw new EntityNotFoundError(OrderModel, "id");
         }
     };
 
     static addSubOrder = async (oid : string, suborderDTO : SubOrderModel) : Promise<OrderModel> => {
-        const errors: ValidationError[] = await validate(suborderDTO);
+        const errors: ValidationError[] = await validate(plainToClass(SubOrderModel, suborderDTO));
         if (errors.length > 0)
-            throw new ValidationError();
+            throw new InvalidEntity(errors);
 
         let order : OrderModel = await OrderManager.getOneById(oid);
         order.subOrders.push(suborderDTO);
@@ -39,13 +46,12 @@ export default class OrderManager {
         }
 
         return order;
-    }
+    };
 
     static makeOrder = async (orderDTO : OrderModel) : Promise<OrderModel> => {
-        const errors = await validate(orderDTO);
+        const errors = await validate(plainToClass(OrderModel, orderDTO));
         if (errors.length > 0) {
-            console.log(`validation errors: ${errors}`);
-            throw new ValidationError();
+            throw new InvalidEntity(errors);
         }
 
         const repo: Repository<OrderModel> = dbConn.getRepository(OrderModel);
@@ -58,9 +64,9 @@ export default class OrderManager {
     };
 
     static editOrder = async (pid : string, orderDTO : OrderModel) : Promise<OrderModel> => {
-        const errors: ValidationError[] = await validate(orderDTO);
+        const errors: ValidationError[] = await validate(plainToClass(OrderModel, orderDTO));
         if (errors.length > 0)
-            throw new ValidationError();
+            throw new InvalidEntity(errors);
 
         await OrderManager.getOneById(pid);
         const repo: Repository<OrderModel> = dbConn.getRepository(OrderModel);
@@ -77,14 +83,6 @@ export default class OrderManager {
     static deleteOrder = async (pid: string) => {
         const repo : Repository<OrderModel> = dbConn.getRepository(OrderModel);
         await repo.remove(await OrderManager.getOneById(pid));
-    }
-
-    static total(order : OrderModel) : number {
-        return order.subOrders.reduce((total : number, subOrder : SubOrderModel) => total + subOrder.product.price * subOrder.amount, 0);
-    }
-
-    static amount(order : OrderModel) : number {
-        return order.subOrders.reduce((total : number, subOrder :  SubOrderModel) => total + subOrder.amount, 0);
-    }
+    };
 
 }

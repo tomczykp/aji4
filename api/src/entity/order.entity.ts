@@ -8,19 +8,19 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import {IsNotEmpty, IsString, IsUUID} from "class-validator";
+import {IsNotEmpty, IsNumber} from "class-validator";
 import {UserModel} from "./user.entity";
+import {OrderStatus} from "./order.status";
 
 @Entity()
 export class OrderModel {
-    @IsUUID()
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column()
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    status: string;
+    status: OrderStatus;
 
     @Column()
     @CreateDateColumn()
@@ -30,6 +30,7 @@ export class OrderModel {
     @UpdateDateColumn()
     updatedAt: Date;
 
+    @IsNotEmpty()
     @ManyToOne(() => UserModel, (user : UserModel) => user.orders)
     user: UserModel;
 

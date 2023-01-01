@@ -3,7 +3,9 @@ import {UserModel} from "../entity/user.entity";
 import {EntityNotFoundError, Not, QueryFailedError, Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
-import UserNameError from "../errors/username.taken";
+import UniqNameError from "../errors/username.taken";
+import {plainToClass} from "class-transformer";
+import InvalidEntity from "../errors/invalid.entity";
 
 export default class UserManager {
 
@@ -18,7 +20,8 @@ export default class UserManager {
     static getAll = async () : Promise<UserModel[]> => {
         const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
         return await userRepository.find({
-            select: {"id": true, "username": true, "role": true}
+            select: {"id": true, "username": true, "role": true},
+            relations: {orders: true}
         });
 
     };
@@ -28,7 +31,8 @@ export default class UserManager {
         try {
            return await userRepository.findOneOrFail({
                 select: {"id": true, "username": true, "role": true},
-                where: {id: uid}
+                where: {id: uid},
+                relations: {orders: true}
             });
         } catch (error) {
             throw new EntityNotFoundError(UserModel, "id");
@@ -36,19 +40,17 @@ export default class UserManager {
     }
 
     static newUser = async (userDTO : UserModel) : Promise<UserModel> => {
-        const errors: ValidationError[] = await validate(userDTO);
+        const errors: ValidationError[] = await validate(plainToClass(UserModel, userDTO));
         if (errors.length > 0)
-            throw new ValidationError();
+            throw new InvalidEntity(errors);
 
         UserManager.hashPassword(userDTO);
 
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
 
-        const usernames = await userRepository.find({
-            where: {username: userDTO.username}
-        });
+        const usernames = await userRepository.find({where: {username: userDTO.username}});
         if (usernames.length > 0)
-            throw new UserNameError();
+            throw new UniqNameError();
 
         try {
             await userRepository.insert(userDTO);
@@ -59,9 +61,9 @@ export default class UserManager {
     };
 
     static editUser = async (uid : string, userDTO : UserModel) : Promise<UserModel> => {
-        const errors: ValidationError[] = await validate(userDTO);
+        const errors: ValidationError[] = await validate(plainToClass(UserModel, userDTO));
         if (errors.length > 0)
-            throw new ValidationError();
+            throw new InvalidEntity(errors);
 
         await UserManager.getOne(uid);
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
@@ -70,7 +72,7 @@ export default class UserManager {
             where: {username: userDTO.username, id: Not(uid)}
         });
         if (usernames.length > 0)
-            throw new UserNameError();
+            throw new UniqNameError();
 
         userDTO.id = uid;
         try {

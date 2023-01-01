@@ -1,27 +1,28 @@
 import {CategoryModel} from "./category.entity";
 import {SubOrderModel} from "./single.order.entity";
 import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique} from "typeorm";
-import {IsNotEmpty, IsNumber, IsString, IsUUID, Length} from "class-validator";
+import {IsNotEmpty, IsNumber, IsString, Length} from "class-validator";
 
 @Entity()
 @Unique(["name"])
 export class ProductModel {
     @PrimaryGeneratedColumn("uuid")
-    @IsUUID()
     id: string;
 
     @Column()
     @IsString()
+    @IsNotEmpty()
     @Length(4, 20)
     name: string;
 
-    @Column({type: "float"})
-    @IsNotEmpty()
     @IsNumber()
+    @IsNotEmpty()
+    @Column({type: "float"})
     price: number;
 
-    @Column({type: "float"})
     @IsNumber()
+    @IsNotEmpty()
+    @Column({type: "float"})
     weight: number;
 
     @IsNotEmpty()
