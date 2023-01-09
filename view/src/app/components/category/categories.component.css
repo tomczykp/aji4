@@ -1,0 +1,23 @@
+.mat-row {
+    height: auto;
+}
+
+.mat-cell {
+    padding: 10px;
+}
+
+.products-list-container {
+    width: 100%;
+    align-content: center;
+    margin: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.mat-row:hover {
+    background-color: #dee2e6;
+    cursor: pointer;
+}
+

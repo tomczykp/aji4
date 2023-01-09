@@ -16,17 +16,21 @@ dbConn
     .initialize()
     .then(() => {
         console.log("Data Source has been initialized!");
-
+        const corsOptions = {
+            origin: 'http://localhost:4200',
+            optionsSuccessStatus: 200
+        };
         const app : express.Application = express();
 
         app.use(express.json());
-        app.use(cors());
+        app.use(cors(corsOptions));
         app.use(helmet());
-        app.use(bodyParser.json());
+	    app.use(bodyParser.urlencoded({ extended: true }));
+	    app.use(bodyParser.json());
 
         //Set all routes from routes folder
         app.use("/user", userRouter);
-        app.use("/auth", authRouter);
+        app.use("/", authRouter);
         app.use("/product", productRouter);
         app.use("/order", orderRouter);
         app.use("/category", categoryRouter);

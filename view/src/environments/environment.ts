@@ -1,15 +1,9 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+import {Validators} from "@angular/forms";
 
 export const environment = {
-  production: false
+  production: false,
+  apiURL: "http://localhost:3000",
+	lenValidation: [Validators.required, Validators.minLength(4), Validators.maxLength(20)],
+	reqValidation: [Validators.required],
+	posNumValidation: [Validators.required, Validators.pattern("([1-9][0-9]*[.0-9]*)|(0.[0-9]*[1-9]+)")]
 };
-
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */

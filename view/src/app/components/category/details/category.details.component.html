@@ -1,0 +1,71 @@
+<section class="align-middle justify-content-center m-0 p-5" >
+
+	<ngb-alert (closed)="uniqName = false" *ngIf="uniqName" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert">
+		Categories must have <strong>unique</strong> names
+	</ngb-alert>
+	<ngb-alert (closed)="invalidName = false" *ngIf="invalidName" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert">
+		Category name must have <strong>4 - 20</strong> letters
+	</ngb-alert>
+
+	<div class="card">
+		<div class="header">
+			<h3 class="mb-4 text-center">{{category.name}}</h3>
+		</div>
+
+		<table class="table table-striped">
+			<thead>
+				<th class="col p-lg-1">
+					Name
+				</th>
+				<th class="col p-lg-1">
+					Price
+				</th>
+				<th class="col p-lg-1">
+					Weight
+				</th>
+			</thead>
+			<tbody>
+				<tr *ngFor="let product of category.products" [routerLink]="['/product', product.id]" style="cursor: pointer">
+					<td>
+						{{product.name}}
+					</td>
+					<td>
+						{{product.price}}
+					</td>
+					<td>
+						{{product.weight}}
+					</td>
+				</tr>
+
+			</tbody>
+		</table>
+	</div>
+
+	<div class="col-md-8 p-lg-4 mx-lg-auto my-lg-4 bg-white border-4 border p-4" *ngIf="role == 'admin' && modify">
+		<form [formGroup]="catForm" (ngSubmit)="onSubmit()">
+
+			<div class="form-outline mb-4">
+				<span class="form-label">Name</span>
+				<input required class="form-control form-control-lg" type="text" id="name" formControlName="name"/>
+			</div>
+			<h6 *ngIf="name && name.touched && name.errors?.['required']"
+			    class="validation-message" style="color: red">
+				Name is required
+			</h6>
+			<h6 *ngIf="(name && name.touched) && (name.errors?.['minlength'] || name.errors?.['maxlength'])"
+			    class="validation-message small form-text w-100" style="color: red">The name must be 4-20
+				characters.
+			</h6>
+
+			<input *ngIf="catForm.valid" type="submit"
+			       class="mt-3 btn btn-primary btn-lg btn-block w-100" value="Change category">
+			<input *ngIf="!catForm.valid" type="submit"
+			       class="mt-3 disabled btn btn-light btn-lg btn-block w-100" value="Change category">
+		</form>
+	</div>
+
+</section>

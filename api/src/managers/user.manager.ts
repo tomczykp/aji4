@@ -4,8 +4,8 @@ import {EntityNotFoundError, Not, QueryFailedError, Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
 import UniqNameError from "../errors/username.taken";
-import {plainToClass} from "class-transformer";
 import InvalidEntity from "../errors/invalid.entity";
+import {UserDTO} from "../dto/user.dto";
 
 export default class UserManager {
 
@@ -17,51 +17,62 @@ export default class UserManager {
         return bcrypt.compareSync(unencryptedPassword, user.password);
     }
 
-    static getAll = async () : Promise<UserModel[]> => {
+    static getAll = async (rel : boolean = true) : Promise<UserModel[]> => {
         const userRepository: Repository<UserModel> = dbConn.getRepository(UserModel);
         return await userRepository.find({
             select: {"id": true, "username": true, "role": true},
-            relations: {orders: true}
+            relations: {orders: rel}
         });
 
     };
 
-    static getOne = async (uid : string) : Promise<UserModel> => {
+    static getOne = async (uid : string, rel : boolean = true) : Promise<UserModel> => {
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
         try {
            return await userRepository.findOneOrFail({
-                select: {"id": true, "username": true, "role": true},
                 where: {id: uid},
-                relations: {orders: true}
+                relations: {orders: rel}
             });
         } catch (error) {
             throw new EntityNotFoundError(UserModel, "id");
         }
     }
 
-    static newUser = async (userDTO : UserModel) : Promise<UserModel> => {
-        const errors: ValidationError[] = await validate(plainToClass(UserModel, userDTO));
+    static newUser = async (userDTO : UserDTO) : Promise<UserModel> => {
+        let user : UserModel = UserModel.make(userDTO);
+        const errors: ValidationError[] = await validate(user);
         if (errors.length > 0)
             throw new InvalidEntity(errors);
 
-        UserManager.hashPassword(userDTO);
+        UserManager.hashPassword(user);
 
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
 
-        const usernames = await userRepository.find({where: {username: userDTO.username}});
+        const usernames = await userRepository.find({where: {username: user.username}});
         if (usernames.length > 0)
             throw new UniqNameError();
 
         try {
-            await userRepository.insert(userDTO);
+            await userRepository.insert(user);
         } catch (e) {
-            throw new QueryFailedError("INSERT", [userDTO], e);
+            throw new QueryFailedError("INSERT", [user], e);
         }
-        return userDTO;
+
+        return user;
     };
 
     static editUser = async (uid : string, userDTO : UserModel) : Promise<UserModel> => {
-        const errors: ValidationError[] = await validate(plainToClass(UserModel, userDTO));
+        let user : UserModel = UserModel.make(userDTO);
+        if (userDTO.password == undefined) {
+            let oriUser: UserModel = await UserManager.getOne(uid);
+            user.password = oriUser.password;
+            console.log()
+        } else {
+            UserManager.hashPassword(user);
+        }
+
+        console.log(`"dto: ${user.password}`);
+        const errors: ValidationError[] = await validate(user);
         if (errors.length > 0)
             throw new InvalidEntity(errors);
 
@@ -69,18 +80,18 @@ export default class UserManager {
         const userRepository : Repository<UserModel> = dbConn.getRepository(UserModel);
 
         const usernames = await userRepository.find({
-            where: {username: userDTO.username, id: Not(uid)}
+            where: {username: user.username, id: Not(uid)}
         });
         if (usernames.length > 0)
             throw new UniqNameError();
 
-        userDTO.id = uid;
+        user.id = uid;
         try {
-            userDTO = await userRepository.save(userDTO);
+            user = await userRepository.save(user);
         } catch (e) {
-            throw new QueryFailedError("UPDATE", [userDTO], e);
+            throw new QueryFailedError("UPDATE", [user], e);
         }
-        return userDTO;
+        return user;
     };
 
     static deleteUser = async (uid : string) => {

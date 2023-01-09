@@ -1,0 +1,69 @@
+<section class="align-middle justify-content-center m-0 p-5" >
+
+	<ngb-alert (closed)="updateFailed = false" *ngIf="updateFailed" [dismissible]="true"
+	           class="alert alert-danger alert-dismissible fade show"
+	           role="alert" >
+		<strong>Update failed.</strong>
+	</ngb-alert>
+
+	<div class="flex-column">
+		<div class="header">
+			<h3 class="text-center mt-3">Order</h3>
+		</div>
+		<div class="">
+			<p class="m-lg-2">
+				Status: <strong class="m-lg-2">{{status(order.status)}}</strong>
+				<button class="btn btn-primary m-lg-2" *ngIf="role == 'admin' && (order.status > 0)" (click)="decStatus()">Prev</button>
+				<button class="btn btn-primary m-lg-2" *ngIf="role == 'admin' && (order.status < 4)" (click)="incStatus()">Next</button>
+			</p>
+			<p class="m-lg-2">User: <strong class="m-lg-2">{{order.user.username}}</strong></p>
+			<p class="m-lg-2">Price: <strong class="m-lg-2">{{suma}}</strong></p>
+		</div>
+		<table class="table table-striped">
+			<caption class="p-2 text-dark">
+				<p class="m-2">Created: {{dateFormat(order.createdAt)}}</p>
+				<strong class="m-2">Last update: {{dateFormat(order.updatedAt)}}</strong>
+			</caption>
+			<thead>
+				<th class="p-lg-3">Product</th>
+				<th class="p-lg-3">Category</th>
+				<th class="p-lg-3">Price</th>
+				<th class="p-lg-3">Amount</th>
+				<th class="p-lg-3">Sum</th>
+			</thead>
+			<tbody>
+			<tr *ngFor="let entry of order.subOrders" [routerLink]="['/product', entry.product.id]" style="cursor: pointer">
+				<td class="p-lg-3">{{entry.product.name}}</td>
+				<td class="p-lg-3">{{entry.product.category.name}}</td>
+				<td class="p-lg-3">{{entry.product.price}}</td>
+				<td class="p-lg-3">{{entry.amount}}</td>
+				<td class="p-lg-3">{{entry.amount * entry.product.price}}</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="col-md-8 p-lg-4 mx-lg-auto my-lg-4 bg-white border-4 border p-4" *ngIf="role == 'admin' && modify">
+		<form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+
+			<div class="form-outline mb-4">
+				<span class="form-label">Name</span>
+				<input required class="form-control form-control-lg" type="text" id="name" formControlName="name"/>
+			</div>
+			<h6 *ngIf="name && name.touched && name.errors?.['required']"
+			    class="validation-message" style="color: red">
+				Name is required
+			</h6>
+			<h6 *ngIf="(name && name.touched) && (name.errors?.['minlength'] || name.errors?.['maxlength'])"
+			    class="validation-message small form-text w-100" style="color: red">The name must be 4-20
+				characters.
+			</h6>
+
+			<input *ngIf="orderForm.valid" type="submit"
+			       class="mt-3 btn btn-primary btn-lg btn-block w-100" value="Change category">
+			<input *ngIf="!orderForm.valid" type="submit"
+			       class="mt-3 disabled btn btn-light btn-lg btn-block w-100" value="Change category">
+		</form>
+	</div>
+
+</section>

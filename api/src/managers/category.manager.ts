@@ -2,66 +2,68 @@ import {CategoryModel} from "../entity/category.entity";
 import {EntityNotFoundError, Not, QueryFailedError, Repository} from "typeorm";
 import {dbConn} from "../app-data-source";
 import {validate, ValidationError} from "class-validator";
-import {plainToClass} from "class-transformer";
 import InvalidEntity from "../errors/invalid.entity";
 import UniqNameError from "../errors/username.taken";
+import {CategoryDTO} from "../dto/category.dto";
 
 export default class CategoryManager {
 
-    static getAll = async () : Promise<CategoryModel[]> => {
+    static getAll = async (rel : boolean = true) : Promise<CategoryModel[]> => {
         const repo : Repository<CategoryModel> = dbConn.getRepository(CategoryModel);
-        return await repo.find({relations: {products: true}});
+        return await repo.find({relations: {products: rel}});
     }
 
-    static getOne = async (cid : string) : Promise<CategoryModel> => {
+    static getOne = async (cid : string, rel : boolean = true) : Promise<CategoryModel> => {
         const repo : Repository<CategoryModel> = dbConn.getRepository(CategoryModel);
         try {
             return await repo.findOneOrFail({
                 where: {id: cid},
-                relations: {products: true}
+                relations: {products: rel}
             });
         } catch (e) {
             throw new EntityNotFoundError(CategoryModel, "id");
         }
     }
 
-    static newCategory = async (catDTO : CategoryModel) : Promise<CategoryModel> => {
-        const errors: ValidationError[] = await validate(plainToClass(CategoryModel, catDTO));
+    static newCategory = async (catDTO : CategoryDTO) : Promise<CategoryModel> => {
+        let category : CategoryModel = CategoryModel.make(catDTO);
+        const errors: ValidationError[] = await validate(category);
         if (errors.length)
             throw new InvalidEntity(errors);
 
         const repo : Repository<CategoryModel> = dbConn.getRepository(CategoryModel);
-        const names : CategoryModel[] = await repo.find({where: {name: catDTO.name}});
+        const names : CategoryModel[] = await repo.find({where: {name: category.name}});
         if (names.length > 0)
             throw new UniqNameError();
 
         try {
-            await repo.insert(catDTO);
+            await repo.insert(category);
         } catch (e) {
-            throw new QueryFailedError("INSERT", [catDTO], e);
+            throw new QueryFailedError("INSERT", [category], e);
         }
 
-        return catDTO;
+        return category;
     }
 
-    static editCategory = async (cid : string, catDTO : CategoryModel) : Promise<CategoryModel> => {
-        const errors: ValidationError[] = await validate(plainToClass(CategoryModel, catDTO));
+    static editCategory = async (cid : string, catDTO : CategoryDTO) : Promise<CategoryModel> => {
+        let category : CategoryModel = CategoryModel.make(catDTO);
+        const errors: ValidationError[] = await validate(category);
         if (errors.length > 0)
             throw new InvalidEntity(errors);
 
         await CategoryManager.getOne(cid);
         const repo: Repository<CategoryModel> = dbConn.getRepository(CategoryModel);
-        const names : CategoryModel[] = await repo.find({where: {name: catDTO.name, id: Not(catDTO.id)}});
+        const names : CategoryModel[] = await repo.find({where: {name: category.name, id: Not(category.id)}});
         if (names.length > 0)
             throw new UniqNameError();
 
-        catDTO.id = cid;
+        category.id = cid;
         try {
-            catDTO = await repo.save(catDTO);
+            category = await repo.save(category);
         } catch (e) {
-            throw new QueryFailedError("UPDATE", [catDTO], e);
+            throw new QueryFailedError("UPDATE", [category], e);
         }
-        return catDTO;
+        return category;
     };
 
     static deleteCategory = async (pid: string) => {

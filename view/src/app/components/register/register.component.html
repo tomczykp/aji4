@@ -1,0 +1,63 @@
+<section class="align-middle justify-content-center m-sm-5 m-2">
+	<ngb-alert (closed)="failedRegister = !failedRegister" *ngIf="failedRegister" [dismissible]="true"
+	           class="alert alert-danger alert-dismissible fade show" role="alert">
+		<strong>There is another account which is registered on this username.</strong>
+	</ngb-alert>
+
+	<div class="container pt-xl-5 h-100 w-100">
+		<div class="row d-flex align-items-center justify-content-center h-100">
+
+			<div
+					class="col-md-11 col-lg-8 col-xl-5 offset-xl-1 p-3 pt-5 p-sm-5 rounded-4"
+					style="background: #ffffff80; border-radius: 10px; box-shadow: 0 4px 30px #0000001a;backdrop-filter: blur(20px);-webkit-backdrop-filter: blur(20px);">
+				<form (ngSubmit)="onSubmit()" [formGroup]="registerForm">
+
+					<!-- Username input -->
+					<div class="form-outline mb-4">
+						<span class="form-label">Username</span>
+						<input class="form-control form-control-lg" formControlName="username" id="username" required
+						       type="text"
+						       [ngClass]="{
+                   'is-valid': username?.valid,
+                   'is-invalid': username && username.touched && username.invalid}"/>
+						<span *ngIf="username && username.touched && username.invalid" class="validation-message">Enter a valid username</span>
+					</div>
+
+					<!-- Password input -->
+					<span class="form-label mb-4">Password</span>
+					<div class="form-outline input-group">
+						<input class="form-control form-control-lg" formControlName="password" id="password" required
+							[type]="isPlainPassword ? 'text' : 'password'"
+							[ngClass]="{
+							'is-valid': password?.valid,
+							'is-invalid': (password && password.touched && password.invalid) }"/>
+						<i class="hover-icon input-group-text bi" [ngClass]="{
+							'bi-eye-slash': !isPlainPassword,
+							'bi-eye': isPlainPassword
+						}" (click)="isPlainPassword = !isPlainPassword">
+						</i>
+					</div>
+					<h6 *ngIf="password && password.touched && password.errors?.['required']"
+					    class="validation-message" style="color: red">
+						Password is required
+					</h6>
+					<h6 *ngIf="(password && password.touched) && (password.errors?.['minlength'] || password.errors?.['maxlength'])"
+					    class="validation-message small form-text w-100" style="color: red">The password must be 4-20
+						characters.
+					</h6>
+
+					<!-- Submit button -->
+					<input *ngIf="registerForm.valid" class="btn btn-primary btn-lg btn-block w-100 mt-5" type="submit"
+					       value="Register">
+					<input *ngIf="!registerForm.valid" class="disabled btn btn-primary btn-lg btn-block w-100 mt-5"
+					       type="submit"
+					       value="Register">
+
+					<div class="mx-auto mt-4">
+						<span>Already have an account? </span> <a routerLink="/login">Sign in</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>

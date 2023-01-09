@@ -1,0 +1,86 @@
+<section class="align-middle justify-content-center m-sm-5 m-2">
+
+	<div class="p-3">
+		<p>Welcome to The Shopp main page, you are <strong>{{text}}</strong> [{{role}}]</p>
+	</div>
+	<div *ngIf="category != ''" class="p-3">
+		<h2>{{category}}</h2>
+	</div>
+
+	<ngb-alert (closed)="productNotFound = false" *ngIf="productNotFound" [dismissible]="true"
+	           class="alert alert-warning alert-dismissible fade show"
+	           role="alert" >
+		<strong>Product not found.</strong>
+	</ngb-alert>
+	<ngb-alert (closed)="deleteSuccess = false" *ngIf="deleteSuccess" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert" >
+		<strong>Deletion was successful.</strong>
+	</ngb-alert>
+	<ngb-alert (closed)="unauthorized = false" *ngIf="unauthorized" [dismissible]="true"
+	           class="alert alert-danger alert-dismissible fade show"
+	           role="alert" >
+		<strong>Unauthorized user.</strong>
+	</ngb-alert>
+
+	<div class="mat-elevation-z5">
+		<table mat-table [dataSource]="dataSource" matSort class="table table-striped">
+			<caption>
+				Products table
+			</caption>
+
+			<ng-container matColumnDef="productId">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Product ID</th>
+				<td [routerLink]="['product', row.productId]" mat-cell class="pt-3" *matCellDef="let row"> {{row.productId}} </td>
+			</ng-container>
+
+			<ng-container matColumnDef="name">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Name</th>
+				<td [routerLink]="['product', row.productId]" mat-cell class="pt-3" *matCellDef="let row"> {{row.name}}</td>
+			</ng-container>
+
+			<ng-container matColumnDef="categoryName">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Category</th>
+				<td [routerLink]="['product', row.productId]" mat-cell class="pt-3" *matCellDef="let row"> {{row.categoryName}}</td>
+			</ng-container>
+
+			<ng-container matColumnDef="price">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Price</th>
+				<td [routerLink]="['product', row.productId]" mat-cell class="pt-3" *matCellDef="let row"> {{row.price}}</td>
+			</ng-container>
+
+			<ng-container matColumnDef="weight">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Weight</th>
+				<td [routerLink]="['product', row.productId]" mat-cell class="pt-3" *matCellDef="let row"> {{row.weight}} </td>
+			</ng-container>
+
+			<ng-container *ngIf="role == 'admin'" matColumnDef="modify">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Modify </th>
+				<td mat-cell *matCellDef="let row">
+					<button mat-button type="button" class="btn btn-warning"
+					        [routerLink]="['product', row.productId, 'modify']">Modify</button>
+				</td>
+			</ng-container>
+
+			<ng-container *ngIf="role == 'user'" matColumnDef="addToCart">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header> Buy </th>
+				<td mat-cell *matCellDef="let row">
+					<button mat-button type="button" class="btn btn-primary" (click)="buy(row.productId)">Buy</button>
+				</td>
+			</ng-container>
+
+			<ng-container *ngIf="role == 'admin'" matColumnDef="delete">
+				<th mat-header-cell *matHeaderCellDef="let row" mat-sort-header> Delete </th>
+				<td mat-cell *matCellDef="let row">
+					<button mat-button type="button" class="btn btn-danger" (click)="deleteProduct(row.productId)">Delete</button>
+				</td>
+			</ng-container>
+
+			<tr mat-header-row *matHeaderRowDef="displayedColumns" ></tr>
+			<tr mat-row *matRowDef="let row; columns: displayedColumns;" ></tr>
+
+		</table>
+		<mat-paginator [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
+	</div>
+
+</section>

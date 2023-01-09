@@ -1,0 +1,35 @@
+<section class="align-middle justify-content-center m-0 p-5" >
+
+	<div class="card">
+		<div class="header">
+			<h3 class="mt-4 text-center">
+				{{product.name}}
+			</h3>
+		</div>
+		<button *ngIf="role == 'user'" mat-button type="button" class="btn btn-primary m-sm-4" (click)="buy()">Buy</button>
+
+		<table class="table table-striped">
+			<tbody>
+				<tr>
+					<th scope="col" class="p-lg-3">Price</th>
+					<td>{{ product.price }}</td>
+				</tr>
+				<tr (click)="filter(product.category.name)" style="cursor: pointer;">
+					<th scope="col" class="p-lg-3">Category</th>
+					<td>{{ product.category.name }}</td>
+				</tr>
+
+				<tr>
+					<th scope="col" class="p-lg-3">Weight</th>
+					<td>{{ product.weight }}</td>
+				</tr>
+				<tr>
+					<th scope="col" class="p-lg-3"> Orders: </th>
+					<td>{{product.orders.length}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+
+</section>

@@ -1,4 +1,4 @@
-import {SubOrderModel} from "./single.order.entity";
+import {SubOrderModel} from "./suborder.entity";
 import {
     Column,
     CreateDateColumn,
@@ -11,6 +11,7 @@ import {
 import {IsNotEmpty, IsNumber} from "class-validator";
 import {UserModel} from "./user.entity";
 import {OrderStatus} from "./order.status";
+import {OrderDTO} from "../dto/order.dto";
 
 @Entity()
 export class OrderModel {
@@ -37,4 +38,9 @@ export class OrderModel {
     @OneToMany(() => SubOrderModel, (suborder : SubOrderModel) => suborder.order)
     subOrders: SubOrderModel[];
 
+    static make(dto : OrderDTO) : OrderModel {
+        let order : OrderModel = new OrderModel();
+        order.status = dto.status ? dto.status : OrderStatus.Received;
+        return order;
+    }
 }

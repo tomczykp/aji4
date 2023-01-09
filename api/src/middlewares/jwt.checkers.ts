@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import {Config} from "../config/environment";
-import {UserModel} from '../entity/user.entity';
-import {dbConn} from "../app-data-source";
+import {JwtPayload} from "jsonwebtoken";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
     //Get the jwt token from the head
-    const token = <string>req.headers["auth"];
+    const token = req.headers.authorization.split(' ')[1];
     let jwtPayload;
 
     //Try to validate the token and get data
@@ -21,8 +20,8 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
     //The token is valid for 1 hour
     //We want to send a new token on every request
-    const { userId, username } = jwtPayload;
-    const newToken = jwt.sign({ userId, username }, Config.jwtSecret, {
+    const { userId, username, role } = jwtPayload;
+    const newToken = jwt.sign({ userId, username, role }, Config.jwtSecret, {
         expiresIn: "1h"
     });
     res.setHeader("token", newToken);
@@ -33,22 +32,21 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
 export const checkRole = (roles: Array<string>) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const id = res.locals.jwtPayload.userId;
+        const authHeader = req.headers.authorization;
 
-        //Get user role from the database
-        const userRepository = dbConn.getRepository(UserModel);
-        let user: UserModel;
-        try {
-            user = await userRepository.findOneOrFail(id);
-        } catch (id) {
-            res.status(401).send();
-            return;
-        }
+	    if (authHeader) {
+		    const token = authHeader.split(' ')[1];
+		    const payload: JwtPayload = <JwtPayload>jwt.verify(token, Config.jwtSecret);
 
-        //Check if array of authorized roles includes the user's role
-        if (roles.indexOf(user.role) > -1)
-            next();
-        else
-            res.status(401).send();
+
+		    //Check if array of authorized roles includes the user's role
+		    if (roles.indexOf(payload.role) > -1)
+			    next();
+		    else
+			    res.status(401).send();
+	    }
+		else {
+		    res.status(401).send();
+	    }
     };
 };

@@ -1,0 +1,111 @@
+<section class="align-middle justify-content-center m-sm-5 m-2">
+
+	<ngb-alert (closed)="invalidForm = false" *ngIf="invalidForm" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert" >
+		<strong>Invalid values in form.</strong>
+	</ngb-alert>
+	<ngb-alert (closed)="uniqName = false" *ngIf="uniqName" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert" >
+		Product name must be <strong>unique</strong>.
+	</ngb-alert>
+	<ngb-alert (closed)="catNotFound = false" *ngIf="catNotFound" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert" >
+		<strong>Category not found.</strong>
+	</ngb-alert>
+
+	<div class="header">
+		<h3 class="mb-4 text-center">Adding new product</h3>
+	</div>
+
+
+	<div class="container h-100 w-100">
+		<div class="row d-flex align-items-center justify-content-center h-100">
+
+			<div
+					class="col-md-11 col-lg-8 col-xl-5 p-3 p-sm-5 rounded-4 bg-opacity-75"
+					style="box-shadow: 0 4px 30px #0000001a;backdrop-filter: blur(20px);-webkit-backdrop-filter: blur(20px);">
+				<form (ngSubmit)="onSubmit()" [formGroup]="productForm" >
+
+					<!-- Name input -->
+					<div class="mt-4">
+						<span class="form-label mb-4">Name</span>
+						<div class="form-outline input-group">
+							<input class="form-control form-control-lg" formControlName="name" id="name"
+								required [ngClass]="{
+									'is-valid': name?.valid,
+									'is-invalid': (name && name.touched && name.invalid) }"/>
+						</div>
+						<h6 *ngIf="name && name.touched && name.errors?.['required']"
+						    class="validation-message" style="color: red">
+							Name is required
+						</h6>
+					</div>
+
+					<!-- Price input -->
+					<div class="mt-4">
+						<span class="form-label">Price</span>
+						<div class="form-outline input-group">
+							<input class="form-control form-control-lg" type="number" formControlName="price" id="price"
+							       required [ngClass]="{
+									'is-valid': price?.valid,
+									'is-invalid': (price && price.touched && price.invalid) }"/>
+						</div>
+						<h6 *ngIf="price && price.touched && price.errors?.['required']"
+						    class="validation-message" style="color: red">
+							Price is required
+						</h6>
+						<h6 *ngIf="price && price.touched && price.errors?.['pattern']"
+						    class="validation-message" style="color: red">
+							Price must be an positive number.
+						</h6>
+					</div>
+
+					<!-- Weight input -->
+					<div class="mt-4">
+						<span class="form-label mb-4">Weight</span>
+						<div class="form-outline input-group">
+							<input class="form-control form-control-lg" type="number" formControlName="weight" id="weight"
+							       required [ngClass]="{
+									'is-valid': weight?.valid,
+									'is-invalid': (weight && weight.touched && weight.invalid) }"/>
+						</div>
+						<h6 *ngIf="weight && weight.touched && weight.errors?.['required']"
+						    class="validation-message" style="color: red">
+							Weight is required
+						</h6>
+						<h6 *ngIf="weight && weight.touched && weight.errors?.['pattern']"
+						    class="validation-message" style="color: red">
+							Weight must be an positive number.
+						</h6>
+					</div>
+
+					<!-- Category input -->
+					<div class="mt-4">
+						<span class="form-label mb-4">Category</span>
+						<div class="form-outline input-group">
+							<select class="form-control form-control-lg" formControlName="category" id="category" required>
+								<option *ngFor="let cat of categories" [ngValue]="cat.name">{{cat.name}}</option>
+							</select>
+						</div>
+						<h6 *ngIf="category && category.touched && category.errors?.['required']"
+						    class="validation-message" style="color: red">
+							Category is required
+						</h6>
+					</div>
+
+					<!-- Submit button -->
+					<input *ngIf="productForm.valid" class="btn btn-primary btn-lg btn-block w-100 mt-3" type="submit"
+					       value="Add product">
+					<input *ngIf="!productForm.valid" class="disabled btn btn-primary btn-lg btn-block w-100 mt-3"
+					       type="submit"
+					       value="Add product">
+
+
+				</form>
+			</div>
+		</div>
+	</div>
+</section>

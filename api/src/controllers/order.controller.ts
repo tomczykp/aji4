@@ -1,18 +1,29 @@
 import {NextFunction, Request, Response} from "express";
 import OrderManager from "../managers/order.manager";
 import {OrderModel} from "../entity/order.entity";
+import {Config} from "../config/environment";
+import {JwtPayload} from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 
 export default class OrderController {
 
-    static listAll = async (req: Request, res: Response): Promise<void> => {
-        const orders : OrderModel[] = await OrderManager.listAll();
-        res.status(200).json(orders);
+    static getAll = async (req: Request, res: Response): Promise<void> => {
+	    const authHeader = req.headers.authorization;
+
+	    if (authHeader) {
+		    const token = authHeader.split(' ')[1];
+		    const payload: JwtPayload = <JwtPayload>jwt.verify(token, Config.jwtSecret);
+		    const orders: OrderModel[] = await OrderManager.getAll(payload.userId);
+		    res.status(200).json(orders);
+	    } else {
+			res.status(401).send();
+	    }
     }
 
-    static getOneById = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
+    static getOne = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         const oid : string = req.params.id;
         try {
-            const order: OrderModel = await OrderManager.getOneById(oid);
+            const order: OrderModel = await OrderManager.getOne(oid);
             res.status(200).json(order);
         } catch (e) {
             return next(e);

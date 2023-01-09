@@ -1,7 +1,7 @@
 import {DataSource} from "typeorm";
 import {ProductModel} from "./entity/product.entity";
 import {UserModel} from "./entity/user.entity";
-import {SubOrderModel} from "./entity/single.order.entity";
+import {SubOrderModel} from "./entity/suborder.entity";
 import {OrderModel} from "./entity/order.entity";
 import {CategoryModel} from "./entity/category.entity";
 

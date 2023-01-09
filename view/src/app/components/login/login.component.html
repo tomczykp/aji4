@@ -1,0 +1,73 @@
+<section class="align-middle justify-content-center m-sm-5 m-2">
+
+	<ngb-alert (closed)="registerSuccessful = false" *ngIf="registerSuccessful" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert" >
+		<strong>You have successfully registered.</strong>
+	</ngb-alert>
+
+	<ngb-alert (closed)="logoutSuccessful = false" *ngIf="logoutSuccessful" [dismissible]="true"
+	           class="alert alert-success alert-dismissible fade show"
+	           role="alert">
+		<strong>You have successfully logged out.</strong>
+	</ngb-alert>
+
+	<ngb-alert (closed)="wrongCredentials = false" *ngIf="wrongCredentials" [dismissible]="true"
+	           class="alert alert-danger alert-dismissible fade show" role="alert">
+		<strong>Error during login.</strong> You should check your credentials.
+	</ngb-alert>
+
+	<div class="container h-100 w-100">
+		<div class="row d-flex align-items-center justify-content-center h-100">
+
+			<div
+					class="col-md-11 col-lg-8 col-xl-5 p-3 p-sm-5 rounded-4 bg-opacity-50"
+					style="box-shadow: 0 4px 30px #0000001a;backdrop-filter: blur(20px);-webkit-backdrop-filter: blur(20px);">
+				<form (ngSubmit)="onSubmit()" [formGroup]="loginForm" >
+
+					<!-- Email input -->
+					<div class="form-outline mb-4">
+						<span class="form-label">Username</span>
+						<input class="form-control form-control-lg" formControlName="username" id="username" required type="username"
+						       [ngClass]="{'is-invalid': username && username.touched && username.invalid}"/>
+					</div>
+
+					<!-- Password input -->
+					<span class="form-label mb-4">Password</span>
+					<div class="form-outline input-group">
+						<input class="form-control form-control-lg" formControlName="password" id="password" required
+						       [type]="isPlainPassword ? 'text' : 'password'"
+						       [ngClass]="{
+							'is-valid': password?.valid,
+							'is-invalid': (password && password.touched && password.invalid) }"/>
+						<i class="hover-icon input-group-text bi" [ngClass]="{
+							'bi-eye-slash': !isPlainPassword,
+							'bi-eye': isPlainPassword
+						}" (click)="isPlainPassword = !isPlainPassword">
+						</i>
+					</div>
+					<h6 *ngIf="password && password.touched && password.errors?.['required']"
+					    class="validation-message" style="color: red">
+						Password is required
+					</h6>
+					<h6 *ngIf="(password && password.touched) && (password.errors?.['minlength'] || password.errors?.['maxlength'])"
+					    class="validation-message small form-text w-100" style="color: red">The password must be 4-20
+						characters.
+					</h6>
+
+					<!-- Submit button -->
+					<input *ngIf="loginForm.valid" class="btn btn-primary btn-lg btn-block w-100 mt-3" type="submit"
+					       value="Sign in">
+					<input *ngIf="!loginForm.valid" class="disabled btn btn-primary btn-lg btn-block w-100 mt-3"
+					       type="submit"
+					       value="Sign in">
+
+
+					<div class="mx-auto m-4">
+						<span>Don't have an account yet? </span> <a routerLink="/register">Sign up</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>

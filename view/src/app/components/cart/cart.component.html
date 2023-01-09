@@ -1,0 +1,38 @@
+<section class="align-middle justify-content-center m-0 p-5" >
+
+	<div class="card">
+		<div class="header">
+			<h3 class="mb-4 text-center">Cart</h3>
+		</div>
+
+		<table class="table table-striped">
+			<thead>
+				<th class="p-lg-3">Product</th>
+				<th class="p-lg-3">Category</th>
+				<th class="p-lg-3">Price</th>
+				<th class="p-lg-3">Amount</th>
+				<th class="p-lg-3">Sum</th>
+			</thead>
+			<tbody>
+				<tr *ngFor="let entry of repr">
+					<td class="p-lg-3">{{entry.product.name}}</td>
+					<td class="p-lg-3">{{entry.product.category.name}}</td>
+					<td class="p-lg-3">{{entry.product.price}}</td>
+					<td class="p-lg-3">
+						<i class="bi bi-plus" style="cursor: pointer; font-size: larger" (click)="inc(entry)">+</i>
+							{{entry.amount}}
+						<i class="bi bi-subtract" style="cursor: pointer; font-size: larger" (click)="dec(entry)">-</i>
+					</td>
+					<td class="p-lg-3">{{entry.amount * entry.product.price}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="p-3 justify-content-center m-4">
+		<button *ngIf="repr.length > 0" class="btn btn-primary" (click)="order()">Make order</button>
+		<button *ngIf="repr.length <= 0" class="btn btn-primary disabled btn-lg" >Make order</button>
+	</div>
+
+
+</section>

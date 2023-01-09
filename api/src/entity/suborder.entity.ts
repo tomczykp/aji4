@@ -2,6 +2,7 @@ import {ProductModel} from "./product.entity";
 import {OrderModel} from "./order.entity";
 import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import {IsNotEmpty, IsNumber} from "class-validator";
+import {SuborderDTO} from "../dto/suborder.dto";
 
 @Entity()
 export class SubOrderModel {
@@ -18,6 +19,12 @@ export class SubOrderModel {
     product: ProductModel;
 
     @IsNotEmpty()
-    @ManyToOne(() => OrderModel, (order :  OrderModel) => order.subOrders)
+    @ManyToOne(() => OrderModel, (order :  OrderModel) => order.subOrders, {onDelete: "CASCADE"})
     order: OrderModel;
+
+    static make(dto : SuborderDTO) : SubOrderModel {
+        let sub : SubOrderModel = new SubOrderModel();
+        sub.amount = dto.amount;
+        return sub;
+    }
 }

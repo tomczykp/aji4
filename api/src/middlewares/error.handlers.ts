@@ -40,7 +40,7 @@ const errorHandler = (app : Application) => {
     });
 
     app.use((error: Error, req: Request, res: Response) => {
-        res.status(500).json({"status": error.message});
+	    return res.status(500).render('error', { error: error.message });
     });
 }
 export default errorHandler;
