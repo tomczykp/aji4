@@ -1,6 +1,6 @@
 import { Router } from "express";
 import UserController from "../controllers/user.controller";
-import {checkJwt} from "../middlewares/jwt.checkers";
+import {checkJwt, checkRole} from "../middlewares/jwt.checkers";
 
 const router : Router = Router();
 
@@ -17,6 +17,6 @@ router.put("/",[checkJwt], UserController.newUser);
 router.post("/:id",[checkJwt], UserController.editUser);
 
 //Delete one user
-router.delete("/:id",[checkJwt], UserController.deleteUser);
+router.delete("/:id",[checkJwt, checkRole(['admin'])], UserController.deleteUser);
 
 export default router;

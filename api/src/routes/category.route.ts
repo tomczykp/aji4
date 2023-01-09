@@ -5,8 +5,8 @@ import {checkJwt, checkRole} from "../middlewares/jwt.checkers";
 const router = Router();
 router.get("/", CategoryController.getAll);
 router.get("/:id", CategoryController.getOne);
-router.put("/", [checkJwt], CategoryController.newCategory);
-router.post("/:id", [checkJwt], CategoryController.editCategory);
-router.delete("/:id", [checkJwt], CategoryController.deleteCategory);
+router.put("/", [checkJwt, checkRole(['admin'])], CategoryController.newCategory);
+router.post("/:id", [checkJwt, checkRole(['admin'])], CategoryController.editCategory);
+router.delete("/:id", [checkJwt, checkRole(['admin'])], CategoryController.deleteCategory);
 
 export default router;

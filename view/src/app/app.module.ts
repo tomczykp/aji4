@@ -27,6 +27,7 @@ import {OrderDetailsComponent} from "./components/order/detail/order.detail.comp
 import {TokenInterceptor} from "./interceptor/jwt.interceptor";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatSelectModule} from "@angular/material/select";
+import {MatInputModule} from "@angular/material/input";
 
 @NgModule({
 	declarations: [
@@ -64,6 +65,7 @@ import {MatSelectModule} from "@angular/material/select";
 		MatIconModule,
 		MatFormFieldModule,
 		MatSelectModule,
+		MatInputModule,
 	],
 	providers: [{ provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }],
 	bootstrap: [AppComponent]

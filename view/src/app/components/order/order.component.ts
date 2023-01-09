@@ -20,8 +20,8 @@ export class OrderComponent implements OnInit {
 	username: string = "";
 	role: string = "";
 	orders!: Order[];
-	deleteSuccess : boolean = false
-	notFound : boolean = false
+	deleteSuccess : boolean = false;
+	notFound : boolean = false;
 
 	displayedColumns: string[] = ['id', 'user', 'status', 'updatedAt', "createdAt"];
 	dataSource: MatTableDataSource<Order> = new MatTableDataSource();
@@ -32,6 +32,11 @@ export class OrderComponent implements OnInit {
 	            private orderService: OrderService,
 	            private authService: AuthService,
 	            private route: ActivatedRoute) {
+	}
+
+	applyFilter(event: Event) {
+		const filterValue : string = (event.target as HTMLInputElement).value.trim();
+		this.dataSource.filter = filterValue;
 	}
 
 	ngOnInit(): void {
@@ -72,6 +77,7 @@ export class OrderComponent implements OnInit {
 					});
 
 					this.dataSource = new MatTableDataSource(this.orders);
+					this.dataSource.filterPredicate = (order : Order, filter: string) => this.status(order.status).toLowerCase().includes(filter.toLowerCase());
 					this.dataSource.paginator = this.paginator;
 					this.dataSource.sort = this.sort;
 				}

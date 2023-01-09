@@ -13,6 +13,10 @@
 
 	<div class="mat-elevation-z5">
 
+		<mat-form-field appearance="outline">
+			<input class="p-2 pt-3" matInput (keyup)="applyFilter($event)" placeholder="Search by status" #input>
+		</mat-form-field>
+
 		<table mat-table [dataSource]="dataSource" matSort class="table table-striped">
 			<caption>
 				Orders table
