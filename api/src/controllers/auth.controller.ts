@@ -48,6 +48,38 @@ export default class AuthController {
 		});
 	};
 
+	static register = async (req: Request, res: Response, next : NextFunction) => {
+		//Check if username and password are set
+		const {username, password} = req.body;
+		if (!(username && password)) {
+			res.status(400).json({"status": `invalid-parameters: ${username} and ${password}`});
+			return;
+		}
+
+
+		let user : UserModel;
+		try {
+			user = await UserManager.newUser({username, password, role: "user"});
+		} catch (e) {
+			return next(e);
+		}
+
+		//Sing JWT, valid for 1 hour
+		const token: string = jwt.sign(
+			{userId: user.id, username: user.username, role: user.role},
+			Config.jwtSecret,
+			{expiresIn: "1h"}
+		);
+
+		//Send the jwt in the response
+		res.status(200).json({
+			jwt: token,
+			username: user.username,
+			role: user.role,
+			id: user.id
+		});
+	};
+
 	static logout = async (req : Request, res: Response) => {
 		res.clearCookie('jwt');
 		res.status(204).send();

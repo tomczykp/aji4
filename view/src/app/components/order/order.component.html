@@ -43,13 +43,6 @@
 				<td [routerLink]="['/order', row.id]" class="pt-3 p-2" mat-cell *matCellDef="let row"> {{dateFormat(row.createdAt)}} </td>
 			</ng-container>
 
-			<ng-container *ngIf="role == 'admin'" matColumnDef="modify">
-				<th mat-header-cell *matHeaderCellDef mat-sort-header> Modify </th>
-				<td class="p-2" mat-cell *matCellDef="let row">
-					<button mat-button type="button" class="btn btn-warning" (click)="modify(row.id)">Modify</button>
-				</td>
-			</ng-container>
-
 			<ng-container *ngIf="role == 'admin'" matColumnDef="delete">
 				<th mat-header-cell *matHeaderCellDef="let row" mat-sort-header> Delete </th>
 				<td class="pt-2" mat-cell *matCellDef="let row">

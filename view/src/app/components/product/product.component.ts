@@ -48,9 +48,11 @@ export class ProductComponent implements OnInit {
 
 				if (res.status == 200 && res.body != null) {
 					this.product = res.body;
-				} else {
-					this.router.navigate(["/"], {queryParams: {'product-not-found': true}});
 				}
+			},
+			error: (res : HttpResponse<Product>) => {
+				if (res.status == 404)
+					this.router.navigate([""], {queryParams: {'product-not-found': true}});
 			}
 		});
 	}

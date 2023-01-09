@@ -24,6 +24,7 @@ export class HomeComponent implements OnInit {
 	productNotFound : boolean = false;
 	deleteSuccess : boolean = false;
 	unauthorized : boolean = false;
+	deleteConstraint : boolean = false;
 	category : string = "";
 
 	@ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -40,8 +41,10 @@ export class HomeComponent implements OnInit {
 		const params = this.route.snapshot.queryParamMap;
 		this.productNotFound = params.has('product-not-found');
 		this.unauthorized = params.has('unauthorized');
+		this.category = "";
 		if (params.has("category"))
 			this.category = <string>params.get("category");
+
 
 		this.authService.authenticated.subscribe((change) => {
 			this.authenticated = change;
@@ -94,7 +97,8 @@ export class HomeComponent implements OnInit {
 			},
 			error: err => {
 				this.getProducts();
-				this.deleteSuccess = err.status != 204;
+				this.deleteSuccess = err.status == 204;
+				this.deleteConstraint = err.status == 501;
 			}
 		});
 	}

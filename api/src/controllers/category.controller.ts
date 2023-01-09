@@ -4,9 +4,13 @@ import CategoryManager from "../managers/category.manager";
 
 export default class CategoryController {
 
-    static getAll = async (req: Request, res: Response) : Promise<void> => {
-        const categories : CategoryModel[] = await CategoryManager.getAll();
-        res.status(200).json(categories);
+    static getAll = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
+		try {
+	        const categories : CategoryModel[] = await CategoryManager.getAll();
+	        res.status(200).json(categories);
+		} catch (e) {
+			return next(e);
+		}
     }
 
     static getOne = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {

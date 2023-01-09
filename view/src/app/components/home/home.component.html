@@ -22,6 +22,11 @@
 	           role="alert" >
 		<strong>Unauthorized user.</strong>
 	</ngb-alert>
+	<ngb-alert (closed)="deleteConstraint = false" *ngIf="deleteConstraint" [dismissible]="true"
+	           class="alert alert-danger alert-dismissible fade show"
+	           role="alert" >
+		<strong>Product is in existing order.</strong>
+	</ngb-alert>
 
 	<div class="mat-elevation-z5">
 		<table mat-table [dataSource]="dataSource" matSort class="table table-striped">

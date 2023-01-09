@@ -6,19 +6,21 @@ import Product from "../../model/product.model";
 })
 export class CartService {
 
+	private cartKey : string = "cart";
+
 	constructor() {
-		if (localStorage.getItem('cart') == null || localStorage.getItem("cart") == "")
+		if (localStorage.getItem(this.cartKey) == null || localStorage.getItem(this.cartKey) == "")
 			localStorage.setItem("cart", "[]");
 	}
 
 	get items() : Product[] {
-		return JSON.parse(<string>localStorage.getItem('cart'));
+		return JSON.parse(<string>localStorage.getItem(this.cartKey));
 	}
 
 	addToCart(product: Product) {
 		let t = this.items;
 		t.push(product);
-		localStorage.setItem("cart", JSON.stringify(t));
+		localStorage.setItem(this.cartKey, JSON.stringify(t));
 	}
 
 	getItems() : Product[] {
@@ -26,6 +28,6 @@ export class CartService {
 	}
 
 	clearCart() {
-		localStorage.setItem("cart", "");
+		localStorage.setItem(this.cartKey, "[]");
 	}
 }

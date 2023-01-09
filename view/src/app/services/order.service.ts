@@ -17,8 +17,8 @@ export class OrderService {
 		return this.http.get<Order>(this.baseUrl + '/' + uuid, {observe: 'response'});
 	}
 
-	public getOrders(): Observable<Order[]> {
-		return this.http.get<Order[]>(this.baseUrl);
+	public getOrders(): Observable<HttpResponse<Order[]>> {
+		return this.http.get<Order[]>(this.baseUrl, {observe: "response"});
 	}
 
 	public add(OrderDTO: object): Observable<HttpResponse<Order>> {
@@ -26,8 +26,8 @@ export class OrderService {
 			{'headers': {'Content-Type': 'application/json'}, observe: 'response'})
 	}
 
-	public update(uuid: string, OrderDTO: object): Observable<HttpResponse<Order>> {
-		return this.http.post<Order>(this.baseUrl + '/' + uuid, OrderDTO,
+	public update(uuid: string, change : String): Observable<HttpResponse<Order>> {
+		return this.http.post<Order>(this.baseUrl + '/' + uuid + "/" + change, {},
 			{'headers': {'Ccontent-Type': 'application/json'}, observe: 'response'})
 	}
 

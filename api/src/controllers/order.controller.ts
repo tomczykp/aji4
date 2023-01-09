@@ -7,17 +7,21 @@ import * as jwt from "jsonwebtoken";
 
 export default class OrderController {
 
-    static getAll = async (req: Request, res: Response): Promise<void> => {
-	    const authHeader = req.headers.authorization;
+    static getAll = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
+		try {
+		    const authHeader = req.headers.authorization;
 
-	    if (authHeader) {
-		    const token = authHeader.split(' ')[1];
-		    const payload: JwtPayload = <JwtPayload>jwt.verify(token, Config.jwtSecret);
-		    const orders: OrderModel[] = await OrderManager.getAll(payload.userId);
-		    res.status(200).json(orders);
-	    } else {
-			res.status(401).send();
-	    }
+		    if (authHeader) {
+			    const token = authHeader.split(' ')[1];
+			    const payload: JwtPayload = <JwtPayload>jwt.verify(token, Config.jwtSecret);
+			    const orders: OrderModel[] = await OrderManager.getAll(payload.userId);
+			    res.status(200).json(orders);
+		    } else {
+				res.status(401).send();
+		    }
+		} catch (e) {
+			return next(e);
+		}
     }
 
     static getOne = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
@@ -50,14 +54,23 @@ export default class OrderController {
     }
 
 
-    static editOrder = async (req: Request, res: Response, next : NextFunction) : Promise<void>=> {
+    static incStatus = async (req: Request, res: Response, next : NextFunction) : Promise<void>=> {
         try {
-            const order : OrderModel = await OrderManager.editOrder(req.params.id, req.body);
+            const order : OrderModel = await OrderManager.changeStatus(req.params.id, true);
             res.status(200).json(order);
         } catch (e) {
             return  next(e);
         }
     }
+
+	static decStatus = async (req: Request, res: Response, next : NextFunction) : Promise<void>=> {
+		try {
+			const order : OrderModel = await OrderManager.changeStatus(req.params.id, false);
+			res.status(200).json(order);
+		} catch (e) {
+			return  next(e);
+		}
+	}
 
     static deleteOrder = async (req: Request, res: Response, next : NextFunction): Promise<void> => {
         try {

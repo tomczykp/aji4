@@ -18,6 +18,7 @@ export class RegisterComponent implements OnInit {
 	public failedRegister: boolean = false;
 	public registerSuccessful : boolean = false;
 	public isPlainPassword : boolean = false;
+	public usernameTaken : boolean = false;
 
 	constructor(
 	  private router: Router,
@@ -49,13 +50,23 @@ export class RegisterComponent implements OnInit {
 
 			this.authService.register(username, password).subscribe({
 				next: (result) => {
-					if (result.status == 201) {
+					if (result.status == 200) {
 						this.router.navigate(['/login'], {queryParams: {'register-success': true}});
+					} else if (result.status == 409) {
+						this.usernameTaken = true;
 					} else {
 						this.clearPassword();
+						this.failedRegister = true;
 					}
 				},
-				error: (_) => {this.failedRegister = true;}
+				error: (result) => {
+					if (result.status == 409) {
+						this.usernameTaken = true;
+					} else {
+						this.clearPassword();
+						this.failedRegister = true;
+					}
+				}
 			});
 		}
 	}

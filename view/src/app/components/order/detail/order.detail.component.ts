@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {HttpResponse} from "@angular/common/http";
 import {AuthService} from "../../../services/auth.service";
@@ -18,20 +18,26 @@ export class OrderDetailsComponent implements OnInit {
 	authenticated!: boolean;
 	order!: Order;
 	orderID!: string;
-	modify : boolean = false;
-	updateFailed : boolean = false;
+	modify: boolean = false;
+	updateFailed: boolean = false;
 	orderForm = new FormGroup({
 		name: new FormControl('', environment.lenValidation),
 	});
+
+	constructor(private router: Router,
+	            private orderService: OrderService,
+	            private authService: AuthService,
+	            private route: ActivatedRoute) {
+	}
 
 	get name() {
 		return this.orderForm.get("name");
 	}
 
-	constructor(private router: Router,
-	            private orderService: OrderService,
-	            private authService: AuthService,
-	            private route: ActivatedRoute) {}
+	get suma() {
+		return this.order.subOrders.reduce(
+			(acc: number, val: SubOrder) => acc + val.amount * val.product.price, 0);
+	}
 
 	ngOnInit(): void {
 
@@ -61,7 +67,7 @@ export class OrderDetailsComponent implements OnInit {
 
 	}
 
-	getOrder() : void {
+	getOrder(): void {
 		this.orderService.getOrder(this.orderID).subscribe({
 			next: (res: HttpResponse<Order>) => {
 				if (res.status == 200 && res.body != null) {
@@ -73,53 +79,49 @@ export class OrderDetailsComponent implements OnInit {
 		});
 	}
 
-	status(s: number) : string {
+	status(s: number): string {
 		switch (s) {
-			case 0: return "Received";
-			case 1: return "InPreparation";
-			case 2: return "OnRoute";
-			case 3: return "Delivered";
-			case 4: return "Canceled";
-			default: return "Lost";
+			case 0:
+				return "Received";
+			case 1:
+				return "InPreparation";
+			case 2:
+				return "OnRoute";
+			case 3:
+				return "Delivered";
+			case 4:
+				return "Canceled";
+			default:
+				return "Lost";
 		}
 	}
 
-	dateFormat(dateS : any) : string {
-		const date : Date = new Date(dateS);
+	dateFormat(dateS: any): string {
+		const date: Date = new Date(dateS);
 		return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 	}
 
-	private updatePartial() {
-		this.orderService.update(this.orderID, {
-			status: this.order.status,
-			user: this.order.user.id,
-			subOrders: this.order.subOrders.map((e) => {
-				return {amount: e.amount, product: e.product.id}
-			})
-		}).subscribe({
-			next: res => {
-				if (res.status != 200)
-					this.updateFailed = true;
-			}
-		});
-	}
-
-	get suma() {
-		return this.order.subOrders.reduce(
-			(acc : number, val : SubOrder) => acc + val.amount * val.product.price, 0);
-	}
-
 	incStatus() {
-		this.order.status++;
-		this.updatePartial();
+		this.changeStatus("inc");
 	}
 
 	decStatus() {
-		this.order.status--;
-		this.updatePartial();
+		this.changeStatus("dec");
 	}
 
-	onSubmit() : void {
+	private changeStatus(change : string) {
+		this.orderService.update(this.orderID, change).subscribe({
+			next: res => {
+				if (res.status == 200) {
+					this.getOrder();
+				}
+			},
+			error: res => {
+				this.updateFailed = true;
+			}
+		});
+	}
+	onSubmit(): void {
 
 	}
 }

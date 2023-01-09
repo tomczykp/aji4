@@ -25,6 +25,7 @@ export class CategoriesComponent implements OnInit {
 	categoryNotFound: boolean = false;
 	uniqName: boolean = false;
 	deleteSuccess: boolean = false;
+	constrainFailed : boolean = false;
 
 
 	@ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -101,7 +102,8 @@ export class CategoriesComponent implements OnInit {
 			},
 			error: err => {
 				this.getCategories();
-				this.deleteSuccess = err.status != 204;
+				this.constrainFailed = err.status == 501;
+				this.categoryNotFound = err.statuss == 404;
 			}
 		});
 	}

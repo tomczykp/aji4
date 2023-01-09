@@ -43,7 +43,9 @@ export class AuthService {
 	}
 
 	register(username: string, password: string) {
-		return this.http.post(`${environment.apiURL}/register`, {username, password}, {observe: 'response'})
+		return this.http.post(`${environment.apiURL}/register`,
+			{username, password},
+			{headers: {'Content-Type': 'application/json'}, observe: 'response'})
 	}
 
 	logout() {

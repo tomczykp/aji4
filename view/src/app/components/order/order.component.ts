@@ -44,11 +44,10 @@ export class OrderComponent implements OnInit {
 				this.username = this.authService.getUsername();
 				this.role = this.authService.getRole();
 				if (this.role == 'admin') {
-					this.displayedColumns.push("modify");
 					this.displayedColumns.push("delete");
 				}
 			} else {
-				this.router.navigate(['/'], {queryParams: {unauthorized: true}});
+				this.router.navigate([''], {queryParams: {unauthorized: true}});
 			}
 		});
 	}
@@ -60,20 +59,26 @@ export class OrderComponent implements OnInit {
 	getOrders() : void {
 		this.orderService.getOrders().subscribe({
 			next: val => {
-				this.orders = val.map((o : Order) => {
-					return {
-						id: o.id,
-						status: o.status,
-						createdAt: o.createdAt,
-						updatedAt: o.updatedAt,
-						user: o.user,
-						subOrders: o.subOrders
-					}
-				});
+				if (val.status == 200 && val.body != null) {
+					this.orders = val.body.map((o: Order) => {
+						return {
+							id: o.id,
+							status: o.status,
+							createdAt: o.createdAt,
+							updatedAt: o.updatedAt,
+							user: o.user,
+							subOrders: o.subOrders
+						}
+					});
 
-				this.dataSource = new MatTableDataSource(this.orders);
-				this.dataSource.paginator = this.paginator;
-				this.dataSource.sort = this.sort;
+					this.dataSource = new MatTableDataSource(this.orders);
+					this.dataSource.paginator = this.paginator;
+					this.dataSource.sort = this.sort;
+				}
+			},
+			error: res => {
+				if (res.status == 501)
+					this.router.navigate([''], {queryParams: {unauthorized: true}});
 			}
 		});
 	}
@@ -96,10 +101,6 @@ export class OrderComponent implements OnInit {
 
 		});
 	};
-
-	modify(uuid : string) {
-		this.router.navigate(["/order", uuid], {queryParams: {modify: true}});
-	}
 
 	status(s: number) : string {
 		switch (s) {

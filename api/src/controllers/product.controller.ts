@@ -4,9 +4,13 @@ import ProductManager from "../managers/product.manager";
 
 export default class ProductController {
 
-    static getAll = async (req: Request, res: Response) : Promise<void> => {
-        const products : ProductModel[] = await ProductManager.getAll();
-        res.status(200).json(products)
+    static getAll = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
+		try {
+	        const products : ProductModel[] = await ProductManager.getAll();
+	        res.status(200).json(products);
+		} catch (e) {
+			return next(e);
+		}
     }
 
     static getOne = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {

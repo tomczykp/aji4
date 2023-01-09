@@ -4,9 +4,13 @@ import UserManager from "../managers/user.manager";
 
 export default class UserController {
 
-    static getAll = async (req: Request, res: Response) : Promise<void> => {
-        const users : UserModel[] = await UserManager.getAll();
-        res.status(200).json(users)
+    static getAll = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
+		try {
+			const users: UserModel[] = await UserManager.getAll();
+			res.status(200).json(users);
+		} catch (e) {
+			return next(e);
+		}
     };
 
     static getOne = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
